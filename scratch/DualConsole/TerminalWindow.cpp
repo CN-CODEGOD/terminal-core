@@ -1,6 +1,7 @@
 #include "TerminalWindow.h"
 #include <dwmapi.h>
 #include <cstring>
+#include <algorithm>
 
 #pragma comment(lib, "dwmapi.lib")
 
@@ -267,8 +268,8 @@ void TerminalWindow::_updateWindowSize()
     RECT clientRect;
     GetClientRect(_hwnd, &clientRect);
 
-    int newCols = std::max(1, clientRect.right / _charWidth);
-    int newRows = std::max(1, clientRect.bottom / _charHeight);
+    int newCols = std::max(1, static_cast<int>(clientRect.right) / _charWidth);
+    int newRows = std::max(1, static_cast<int>(clientRect.bottom) / _charHeight);
 
     if (newCols != _cols || newRows != _rows)
     {
@@ -600,46 +601,6 @@ void TerminalWindow::_onKeyDown(WPARAM vkKey, LPARAM lParam)
     {
         char ctrlChar = static_cast<char>(vkKey - 'A' + 1);
         _pty->WriteInput(&ctrlChar, 1);
-    }
-}
-        case VK_DOWN:
-            _pty->WriteInput("\x1b[B", 3);
-            break;
-        case VK_RIGHT:
-            _pty->WriteInput("\x1b[C", 3);
-            break;
-        case VK_LEFT:
-            _pty->WriteInput("\x1b[D", 3);
-            break;
-        case VK_HOME:
-            _pty->WriteInput("\x1b[H", 3);
-            break;
-        case VK_END:
-            _pty->WriteInput("\x1b[F", 3);
-            break;
-        case VK_DELETE:
-            _pty->WriteInput("\x1b[3~", 4);
-            break;
-        case VK_INSERT:
-            _pty->WriteInput("\x1b[2~", 4);
-            break;
-        case VK_PRIOR:
-            _pty->WriteInput("\x1b[5~", 4);
-            break;
-        case VK_NEXT:
-            _pty->WriteInput("\x1b[6~", 4);
-            break;
-        default:
-            if (vkKey >= 'A' && vkKey <= 'Z')
-            {
-                if (keyState[VK_CONTROL] & 0x80)
-                {
-                    char ctrl = static_cast<char>(vkKey - 'A' + 1);
-                    _pty->WriteInput(&ctrl, 1);
-                }
-            }
-            break;
-        }
     }
 }
 
